@@ -53,6 +53,7 @@ function LoginForm() {
       {!showEmailForm ? (
         <div className="space-y-4">
           <button 
+            type="button"
             onClick={() => setShowEmailForm(true)}
             className="w-full py-3 bg-white text-black rounded-full font-semibold flex items-center justify-center gap-3 hover:bg-zinc-200 transition-colors"
           >
@@ -60,6 +61,7 @@ function LoginForm() {
             Continue with Email
           </button>
           <button 
+            type="button"
             onClick={() => signInWithGithub()}
             className="w-full py-3 border border-border rounded-full font-semibold flex items-center justify-center gap-3 hover:bg-accent transition-colors"
           >
@@ -68,7 +70,7 @@ function LoginForm() {
           </button>
         </div>
       ) : (
-        <form action={handleSubmit as any} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-widest text-muted font-bold ml-1">Email</label>
             <input 
@@ -90,6 +92,7 @@ function LoginForm() {
             />
           </div>
           <button 
+            type="submit"
             disabled={loading}
             className="w-full py-3 bg-white text-black rounded-full font-semibold flex items-center justify-center gap-3 hover:bg-zinc-200 transition-colors disabled:opacity-50"
           >
@@ -117,6 +120,7 @@ function LoginForm() {
 
       <div className="text-center">
         <button 
+          type="button"
           onClick={() => {
             setIsLogin(!isLogin)
             setShowEmailForm(false)
@@ -126,6 +130,7 @@ function LoginForm() {
           {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
         </button>
       </div>
+
     </div>
   )
 }
