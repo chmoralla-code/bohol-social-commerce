@@ -1,65 +1,63 @@
-import Image from "next/image";
+import Navbar from "@/components/Navbar"
+import ProductCard from "@/components/ProductCard"
 
 export default function Home() {
+  // Mock data for initial preview
+  const products = [
+    { id: 1, name: "Handwoven Native Bag", price: 1200, seller: "Antequera Crafts" },
+    { id: 2, name: "Premium Peanut Kisses Pack", price: 450, seller: "Bohol Sweets" },
+    { id: 3, name: "Handcrafted Chocolate Hills Sculpture", price: 2500, seller: "Tagbilaran Arts" },
+    { id: 4, name: "Organic Coconut Oil 500ml", price: 350, seller: "Loon Organics" },
+    { id: 5, name: "Traditional Salakot", price: 800, seller: "Bohol Heritage" },
+    { id: 6, name: "Local Coffee Beans 250g", price: 600, seller: "Jagna Coffee" },
+  ]
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen pt-16 bg-background">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <section className="relative h-[70vh] flex items-center justify-center overflow-hidden border-b border-border">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-zinc-800/20 via-transparent to-transparent" />
+        <div className="relative z-10 text-center space-y-6 px-4">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-gradient leading-tight">
+            Elevating Bohol's <br /> Finest Creations.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-muted text-lg max-w-2xl mx-auto font-light leading-relaxed">
+            Discover a curated collection of premium products from local artisans and sellers across Bohol. 
+            Seamless payment via GCash, final handoff to Messenger.
           </p>
+          <div className="flex items-center justify-center gap-4 pt-4">
+            <button className="px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-zinc-200 transition-colors">
+              Browse Catalog
+            </button>
+            <button className="px-8 py-3 border border-border rounded-full font-semibold hover:bg-accent transition-colors">
+              Become a Seller
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Product Grid */}
+      <section className="max-w-7xl mx-auto px-4 py-20">
+        <div className="flex items-end justify-between mb-12">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted font-bold">Featured Catalog</p>
+            <h2 className="text-3xl font-bold tracking-tight text-white">Curated Selection</h2>
+          </div>
+          <button className="text-sm font-medium hover:underline underline-offset-4 text-white">View All Products</button>
         </div>
-      </main>
-    </div>
-  );
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+          {products.map((p) => (
+            <ProductCard key={p.id} {...p} />
+          ))}
+        </div>
+      </section>
+
+      <footer className="border-t border-border py-12 text-center text-muted text-sm font-light">
+        <p>© 2025 Bohol Social Commerce Platform. All rights reserved.</p>
+      </footer>
+    </main>
+  )
 }
