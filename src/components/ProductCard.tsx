@@ -2,22 +2,25 @@
 
 import Image from "next/image"
 import { motion } from "framer-motion"
+import Link from "next/link"
 
 interface ProductCardProps {
+  id: number | string
   name: string
   price: number
   image?: string
   seller: string
 }
 
-export default function ProductCard({ name, price, image, seller }: ProductCardProps) {
+export default function ProductCard({ id, name, price, image, seller }: ProductCardProps) {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      className="premium-card rounded-xl overflow-hidden group cursor-pointer"
-    >
+    <Link href={`/product/${id}`}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -4 }}
+        className="premium-card rounded-xl overflow-hidden group cursor-pointer"
+      >
       <div className="relative aspect-square bg-accent overflow-hidden">
         {image ? (
           <Image 
@@ -41,5 +44,6 @@ export default function ProductCard({ name, price, image, seller }: ProductCardP
         <p className="text-sm font-mono">₱{price.toLocaleString()}</p>
       </div>
     </motion.div>
+    </Link>
   )
 }
