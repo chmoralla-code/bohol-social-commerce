@@ -1,8 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
-import { Package, TrendingUp, Users, ArrowRight } from 'lucide-react'
+import { Package, TrendingUp, Users, ArrowRight, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ message?: string }>
+}) {
+  const { message } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -19,6 +24,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {message && (
+        <div className="p-4 bg-green-500/10 border border-green-500/50 rounded-xl flex items-center gap-3 text-green-500 text-sm animate-in fade-in slide-in-from-top-4 duration-500">
+          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+          <p>{message}</p>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
         <Link 

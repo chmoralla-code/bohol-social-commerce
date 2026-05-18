@@ -38,7 +38,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  redirect('/dashboard?message=' + encodeURIComponent('Login successful! Welcome to your dashboard.'))
 }
 
 export async function signup(formData: FormData) {
@@ -59,7 +59,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  return redirect('/login?message=Check your email for the confirmation link')
+  return redirect('/login?message=' + encodeURIComponent('Registered successfully! Please check your email for the confirmation link.'))
 }
 
 export async function signOut() {

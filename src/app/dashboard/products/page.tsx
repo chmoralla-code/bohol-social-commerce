@@ -1,10 +1,15 @@
 import { createClient } from '@/utils/supabase/server'
-import { Trash2, Package } from 'lucide-react'
+import { Trash2, Package, Edit2 } from 'lucide-react'
 import { revalidatePath } from 'next/cache'
 import Image from 'next/image'
-import AddProductForm from '@/components/AddProductForm'
+import ProductForm from '@/components/ProductForm'
 
-export default async function ProductsPage() {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>
+}) {
+  const { edit } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -14,19 +19,21 @@ export default async function ProductsPage() {
     .eq('seller_id', user?.id)
     .order('created_at', { ascending: false })
 
+  const editingProduct = edit 
+    ? products?.find(p => p.id === edit) 
+    : null
+
   async function deleteProduct(formData: FormData) {
     'use server'
     const supabase = await createClient()
     const id = formData.get('id') as string
 
-    // 1. Get product to find image path
     const { data: product } = await supabase
       .from('products')
       .select('image_url')
       .eq('id', id)
       .single()
 
-    // 2. Delete from database
     const { error: dbError } = await supabase
       .from('products')
       .delete()
@@ -36,7 +43,6 @@ export default async function ProductsPage() {
       console.error(dbError)
     }
 
-    // 3. Delete from storage if exists
     if (product?.image_url) {
       const path = product.image_url.split('/').pop()
       if (path) {
@@ -59,17 +65,15 @@ export default async function ProductsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Add Product Form (Client Component with Compression) */}
         <div className="lg:col-span-1 space-y-6">
-          <AddProductForm userId={user?.id || ''} />
+          <ProductForm userId={user?.id || ''} initialData={editingProduct} />
         </div>
 
-        {/* Product List */}
         <div className="lg:col-span-2 space-y-4">
           {products && products.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {products.map((product) => (
-                <div key={product.id} className="premium-card p-4 rounded-2xl flex items-center gap-4 group">
+                <div key={product.id} className="premium-card p-4 rounded-2xl flex items-center gap-4 group relative">
                   <div className="w-20 h-20 bg-accent rounded-xl overflow-hidden relative flex-shrink-0">
                     {product.image_url ? (
                       <Image src={product.image_url} alt={product.name} fill className="object-cover" />
@@ -82,15 +86,24 @@ export default async function ProductsPage() {
                     <p className="text-sm text-gradient font-mono">₱{product.price.toLocaleString()}</p>
                     <p className="text-[10px] text-muted truncate mt-1 font-light">{product.description}</p>
                   </div>
-                  <form action={deleteProduct}>
-                    <input type="hidden" name="id" value={product.id} />
-                    <button 
-                      type="submit"
-                      className="p-2 hover:bg-red-500/10 text-muted hover:text-red-500 rounded-lg transition-colors"
+                  
+                  <div className="flex items-center gap-1">
+                    <a 
+                      href={`/dashboard/products?edit=${product.id}`}
+                      className="p-2 hover:bg-white/10 text-muted hover:text-white rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </form>
+                      <Edit2 className="w-5 h-5" />
+                    </a>
+                    <form action={deleteProduct}>
+                      <input type="hidden" name="id" value={product.id} />
+                      <button 
+                        type="submit"
+                        className="p-2 hover:bg-red-500/10 text-muted hover:text-red-500 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </form>
+                  </div>
                 </div>
               ))}
             </div>
