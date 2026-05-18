@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/Navbar"
 import { useState } from "react"
-import { GithubIcon, Mail } from "lucide-react"
+import { Github, Mail } from "lucide-react"
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -27,7 +27,7 @@ export default function Login() {
               Continue with Email
             </button>
             <button className="w-full py-3 border border-border rounded-full font-semibold flex items-center justify-center gap-3 hover:bg-accent transition-colors">
-              <GithubIcon className="w-5 h-5" />
+              <Github className="w-5 h-5" />
               Continue with GitHub
             </button>
           </div>
