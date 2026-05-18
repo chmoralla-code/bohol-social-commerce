@@ -1,16 +1,21 @@
 import Navbar from "@/components/Navbar"
 import ProductCard from "@/components/ProductCard"
+import { createClient } from "@/utils/supabase/server"
 
-export default function Home() {
-  // Mock data for initial preview
-  const products = [
-    { id: 1, name: "Handwoven Native Bag", price: 1200, seller: "Antequera Crafts" },
-    { id: 2, name: "Premium Peanut Kisses Pack", price: 450, seller: "Bohol Sweets" },
-    { id: 3, name: "Handcrafted Chocolate Hills Sculpture", price: 2500, seller: "Tagbilaran Arts" },
-    { id: 4, name: "Organic Coconut Oil 500ml", price: 350, seller: "Loon Organics" },
-    { id: 5, name: "Traditional Salakot", price: 800, seller: "Bohol Heritage" },
-    { id: 6, name: "Local Coffee Beans 250g", price: 600, seller: "Jagna Coffee" },
-  ]
+export default async function Home() {
+  const supabase = await createClient()
+  
+  // Fetch real products and join with seller profile
+  const { data: products } = await supabase
+    .from('products')
+    .select(`
+      *,
+      profiles:seller_id (
+        store_name
+      )
+    `)
+    .order('created_at', { ascending: false })
+    .limit(8)
 
   return (
     <main className="min-h-screen pt-16 bg-background">
@@ -48,11 +53,24 @@ export default function Home() {
           <button className="text-sm font-medium hover:underline underline-offset-4 text-white">View All Products</button>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {products.map((p) => (
-            <ProductCard key={p.id} {...p} />
-          ))}
-        </div>
+        {products && products.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+            {products.map((p) => (
+              <ProductCard 
+                key={p.id} 
+                id={p.id}
+                name={p.name}
+                price={p.price}
+                image={p.image_url}
+                seller={p.profiles?.store_name || 'Local Seller'} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 text-muted">
+            <p>No products found in the catalog yet.</p>
+          </div>
+        )}
       </section>
 
       <footer className="border-t border-border py-12 text-center text-muted text-sm font-light">

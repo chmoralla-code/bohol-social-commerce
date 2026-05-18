@@ -2,22 +2,51 @@
 
 import { useParams } from "next/navigation"
 import Navbar from "@/components/Navbar"
-import { ArrowLeft, MessageCircle, QrCode } from "lucide-react"
+import { ArrowLeft, MessageCircle, QrCode, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { createClient } from "@/utils/supabase/client"
+import Image from "next/image"
 
 export default function ProductDetail() {
   const { id } = useParams()
   const [showPayment, setShowPayment] = useState(false)
+  const [product, setProduct] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
-  // Mock data
-  const product = {
-    name: "Handwoven Native Bag",
-    price: 1200,
-    seller: "Antequera Crafts",
-    description: "Authentic handwoven bag made from sustainable locally sourced Buri palm leaves. Each piece is unique and supports the local weaving community in Antequera, Bohol.",
-    gcashQr: "/mock-qr.png", // Placeholder
-    messengerLink: "https://m.me/yourpage" // Placeholder
+  useEffect(() => {
+    async function fetchProduct() {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          *,
+          profiles:seller_id (*)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (data) setProduct(data)
+      setLoading(false)
+    }
+    fetchProduct()
+  }, [id, supabase])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-white" />
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-4">
+        <p className="text-white">Product not found.</p>
+        <Link href="/" className="text-muted hover:text-white underline">Return Home</Link>
+      </div>
+    )
   }
 
   if (showPayment) {
@@ -27,14 +56,23 @@ export default function ProductDetail() {
         <div className="max-w-md mx-auto px-4 py-20 text-center space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">Complete Payment</h1>
-            <p className="text-muted text-sm">Scan the QR code below using your GCash app.</p>
+            <p className="text-muted text-sm font-light">Scan the QR code below using your GCash app.</p>
           </div>
           
-          <div className="relative aspect-square max-w-[300px] mx-auto bg-white p-4 rounded-2xl">
-             {/* In a real app, this would be the seller's QR code */}
-             <div className="w-full h-full flex items-center justify-center bg-zinc-100 rounded-lg">
-                <QrCode className="w-20 h-20 text-black" />
-             </div>
+          <div className="relative aspect-square max-w-[300px] mx-auto bg-white p-4 rounded-2xl overflow-hidden">
+             {product.profiles?.gcash_qr_url ? (
+               <Image 
+                 src={product.profiles.gcash_qr_url} 
+                 alt="GCash QR" 
+                 fill 
+                 className="object-contain p-2"
+               />
+             ) : (
+               <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-100 rounded-lg text-black gap-2">
+                  <QrCode className="w-16 h-16" />
+                  <p className="text-[10px] uppercase font-bold text-muted">QR Not Available</p>
+               </div>
+             )}
           </div>
 
           <div className="space-y-4">
@@ -43,7 +81,7 @@ export default function ProductDetail() {
               <p className="text-2xl font-mono font-bold">₱{product.price.toLocaleString()}</p>
             </div>
             
-            <div className="text-left text-sm text-muted space-y-2 px-2">
+            <div className="text-left text-sm text-muted space-y-2 px-2 font-light">
               <p>1. Open GCash app and select 'Scan QR'.</p>
               <p>2. Send the exact amount: ₱{product.price.toLocaleString()}.</p>
               <p>3. Take a screenshot of the receipt.</p>
@@ -51,7 +89,8 @@ export default function ProductDetail() {
           </div>
 
           <Link 
-            href={product.messengerLink}
+            href={product.profiles?.messenger_link || '#'}
+            target="_blank"
             className="block w-full py-4 bg-white text-black rounded-full font-bold hover:bg-zinc-200 transition-all flex items-center justify-center gap-2"
           >
             <MessageCircle className="w-5 h-5" />
@@ -73,27 +112,31 @@ export default function ProductDetail() {
     <main className="min-h-screen pt-16 bg-background">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <Link href="/" className="inline-flex items-center gap-2 text-muted hover:text-white mb-8 transition-colors">
+        <Link href="/" className="inline-flex items-center gap-2 text-muted hover:text-white mb-8 transition-colors text-sm uppercase tracking-widest font-bold">
           <ArrowLeft className="w-4 h-4" />
           Back to Catalog
         </Link>
 
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-          <div className="aspect-square bg-accent rounded-3xl overflow-hidden border border-border">
-            <div className="w-full h-full flex items-center justify-center text-muted uppercase tracking-widest text-sm">
-              Product Image
-            </div>
+          <div className="aspect-square bg-accent rounded-3xl overflow-hidden border border-border relative">
+            {product.image_url ? (
+              <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted uppercase tracking-widest text-sm">
+                Product Image
+              </div>
+            )}
           </div>
 
           <div className="space-y-8 py-4">
             <div className="space-y-4">
-              <p className="text-sm uppercase tracking-[0.3em] text-muted font-bold">{product.seller}</p>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">{product.name}</h1>
+              <p className="text-xs uppercase tracking-[0.4em] text-muted font-bold">{product.profiles?.store_name || 'Local Seller'}</p>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white">{product.name}</h1>
               <p className="text-3xl font-mono text-gradient">₱{product.price.toLocaleString()}</p>
             </div>
 
             <p className="text-muted leading-relaxed text-lg font-light">
-              {product.description}
+              {product.description || 'No description provided.'}
             </p>
 
             <div className="space-y-4 pt-4">
@@ -103,9 +146,12 @@ export default function ProductDetail() {
               >
                 Buy with GCash
               </button>
-              <p className="text-center text-[10px] text-muted uppercase tracking-widest">
-                Secure transaction via GCash & Messenger
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[10px] text-muted uppercase tracking-widest font-bold">
+                  Seller is active & ready to fulfill
+                </p>
+              </div>
             </div>
           </div>
         </div>
